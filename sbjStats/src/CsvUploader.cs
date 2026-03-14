@@ -22,7 +22,7 @@ public static class CsvUploader
         // Print csv to console for debugging
         Log.Information("Generated CSV:\n{Csv}", csv);
         
-        UploadCsv(csv, endpoint, apiKey);
+        UploadCsvAsync(csv, endpoint, apiKey);
     }
     
     public static async Task SendMassStatsAsCsvAsync(
@@ -40,10 +40,18 @@ public static class CsvUploader
         string apiKey)
     {
         if (string.IsNullOrWhiteSpace(endpoint))
-            throw new Exception("Upload endpoint is missing.");
+        {
+            Plugin.Instance?.ShowToast("Upload endpoint is missing.",
+                Dalamud.Interface.ImGuiNotification.NotificationType.Error);
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(apiKey))
-            throw new Exception("API key is missing.");
+        {
+            Plugin.Instance?.ShowToast("API key is missing.",
+                Dalamud.Interface.ImGuiNotification.NotificationType.Error);
+            return;
+        }
 
         using var client = new HttpClient();
         client.DefaultRequestHeaders.Authorization =
