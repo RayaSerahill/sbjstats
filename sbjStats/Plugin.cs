@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dalamud.Game.Command;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Interface.Windowing;
@@ -15,9 +17,11 @@ namespace sbjStats;
 
 public sealed class Plugin : IDalamudPlugin
 {
+    public static Plugin Instance { get; private set; }
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; set; } = null!;
     [PluginService] internal static IPluginLog Log { get; set; } = null!;
+    [PluginService] internal static INotificationManager NotificationManager { get; set; } = null!;
 
     private const string CommandName = "/sbjstats";
 
@@ -31,6 +35,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin()
     {
+        Instance = this;
         ECommonsMain.Init(PluginInterface, this, Module.All);
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
@@ -89,20 +94,42 @@ public sealed class Plugin : IDalamudPlugin
 
     private void OnCommand(string command, string args)
     {
-        var trimmedArgs = args?.Trim().ToLowerInvariant();
-        if (trimmedArgs == "archive")
+        OpenConfigUi();
+    }
+    
+    public async Task UploadExistingStatsAsync()
+    {
+        var archives = SimpleBlackjackIpc.GetArchives();
+        var allStats = new List<StatsRecording>();
+        ShowToast($"Starting upload of existing stats for {archives.Count} archives...", NotificationType.Info);
+
+        Log.Information("========== Available Archives ==========");
+        foreach (var kvp in archives)
         {
-            var archives = SimpleBlackjackIpc.GetArchives();
-            Log.Information(Newtonsoft.Json.JsonConvert.SerializeObject(archives));
-            var output = string.Join(", ", archives.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-            Log.Information(output);
-            Log.Information("========== Available Archives ==========");
-        }
-        else
-        {
-            OpenConfigUi();
+            var stats = SimpleBlackjackIpc.GetStats(kvp.Key);
+            allStats.AddRange(stats);
         }
 
+        await CsvUploader.SendMassStatsAsCsvAsync(allStats, Configuration.Endpoint, Configuration.ApiKey);
+        
+        Log.Information("========== End of Available Archives ==========");
+    }
+
+    public void ShowToast(string message, NotificationType type = NotificationType.Info)
+    {
+        try
+        {
+            NotificationManager.AddNotification(new Notification
+            {
+                Content = message,
+                Type = type,
+                Minimized = false
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Warning($"Failed to show notification: {ex.Message}");
+        }
     }
 
     private void DrawUi()

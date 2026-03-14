@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Windowing;
 
 namespace sbjStats.Windows;
@@ -45,11 +46,20 @@ public sealed class ConfigWindow : Window, IDisposable
             plugin.Configuration.EnableUpload = enableUpload;
             plugin.Configuration.Save();
         }
+        
+        ImGui.Spacing();
+        ImGui.Spacing();
+        ImGui.TextWrapped("If you have existing stats that you want to upload, you can do so by clicking the button below. This will upload all stats that have been recorded so far while avoiding duplicates that are already uploaded.");
 
-        if (ImGui.CollapsingHeader("Debug"))
+        if (ImGui.Button("Upload existing stats"))
         {
-            ImGui.Text($"Endpoint set: {!string.IsNullOrWhiteSpace(endpoint)}");
-            ImGui.Text($"API key set: {!string.IsNullOrWhiteSpace(apiKey)}");
+            if (String.IsNullOrEmpty(plugin.Configuration.Endpoint) || String.IsNullOrEmpty(plugin.Configuration.ApiKey))
+            {
+                
+                plugin.ShowToast("Please enter a valid endpoint and API key.", NotificationType.Error);
+                return;
+            }
+            plugin.UploadExistingStatsAsync();
         }
     }
 }
