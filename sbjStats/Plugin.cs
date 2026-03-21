@@ -31,6 +31,8 @@ public sealed class Plugin : IDalamudPlugin
     private SimpleBlackjackIpc SimpleBlackjackIpc { get; set; }
     private bool ipcInitialized = false;
     
+    const string Endpoint = "https://stats.serahill.net/api/admin/games/import";
+    
     
 
     public Plugin()
@@ -76,7 +78,7 @@ public sealed class Plugin : IDalamudPlugin
     private void processRound(StatsRecording obj)
     {
         Log.Information("Processing completed SBJ round, uploading stats...");
-        CsvUploader.SendStatAsCsv(obj, Configuration.Endpoint, Configuration.ApiKey);
+        CsvUploader.SendStatAsCsv(obj, Endpoint, Configuration.ApiKey);
     }
 
     public void Dispose()
@@ -110,7 +112,7 @@ public sealed class Plugin : IDalamudPlugin
             allStats.AddRange(stats);
         }
 
-        await CsvUploader.SendMassStatsAsCsvAsync(allStats, Configuration.Endpoint, Configuration.ApiKey);
+        await CsvUploader.SendMassStatsAsCsvAsync(allStats, Endpoint, Configuration.ApiKey);
         
         Log.Information("========== End of Available Archives ==========");
     }
@@ -155,7 +157,7 @@ public sealed class Plugin : IDalamudPlugin
 
             CsvUploader.SendStatAsCsv(
                 stat,
-                Configuration.Endpoint,
+                Endpoint,
                 Configuration.ApiKey);
 
             PluginLog.Information("SBJ stat uploaded.");

@@ -9,7 +9,6 @@ namespace sbjStats.Windows;
 public sealed class ConfigWindow : Window, IDisposable
 {
     private readonly Plugin plugin;
-    private string endpoint;
     private string apiKey;
     private bool enableUpload;
 
@@ -24,7 +23,6 @@ public sealed class ConfigWindow : Window, IDisposable
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
-        endpoint = plugin.Configuration.Endpoint;
         apiKey = plugin.Configuration.ApiKey;
         enableUpload = plugin.Configuration.EnableUpload;
     }
@@ -35,13 +33,11 @@ public sealed class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.InputText("Endpoint", ref endpoint, 512);
         ImGui.InputText("API Key", ref apiKey, 512);
         ImGui.Checkbox("Enable Upload", ref enableUpload);
 
         if (ImGui.Button("Save"))
         {
-            plugin.Configuration.Endpoint = endpoint.Trim();
             plugin.Configuration.ApiKey = apiKey.Trim();
             plugin.Configuration.EnableUpload = enableUpload;
             plugin.Configuration.Save();
@@ -53,10 +49,10 @@ public sealed class ConfigWindow : Window, IDisposable
 
         if (ImGui.Button("Upload existing stats"))
         {
-            if (String.IsNullOrEmpty(plugin.Configuration.Endpoint) || String.IsNullOrEmpty(plugin.Configuration.ApiKey))
+            if (String.IsNullOrEmpty(plugin.Configuration.ApiKey))
             {
                 
-                plugin.ShowToast("Please enter a valid endpoint and API key.", NotificationType.Error);
+                plugin.ShowToast("Please enter a valid API key.", NotificationType.Error);
                 return;
             }
             plugin.UploadExistingStatsAsync();
