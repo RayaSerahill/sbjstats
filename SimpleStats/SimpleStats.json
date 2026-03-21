@@ -1,0 +1,12 @@
+{
+  "Author": "Raya Serahill",
+  "Name": "SimpleStats",
+  "Punchline": "Automatically upload simple gamba stats to stats.serahill.net",
+  "Description": "This plugin automatically uploads simple gamba stats to stats.serahill.net, allowing you to easily share your stats with others. It is designed to be simple and easy to use, with minimal configuration required",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "gamba",
+    "sbj",
+    "stats"
+  ]
+}

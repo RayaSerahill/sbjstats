@@ -23,7 +23,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IPluginLog Log { get; set; } = null!;
     [PluginService] internal static INotificationManager NotificationManager { get; set; } = null!;
 
-    private const string CommandName = "/sbjstats";
+    private const string CommandName = "/simplestats";
 
     public Configuration Configuration { get; }
     public WindowSystem WindowSystem { get; } = new("sbjStats");
@@ -33,8 +33,6 @@ public sealed class Plugin : IDalamudPlugin
     
     const string Endpoint = "https://stats.serahill.net/api/admin/games/import";
     
-    
-
     public Plugin()
     {
         Instance = this;
