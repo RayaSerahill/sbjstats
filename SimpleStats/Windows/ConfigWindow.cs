@@ -33,29 +33,39 @@ public sealed class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.InputText("API Key", ref apiKey, 512);
-        ImGui.Checkbox("Enable Upload", ref enableUpload);
+        if (ImGui.InputText("API Key", ref apiKey, 512))
+            UpdateConfig(() => plugin.Configuration.ApiKey = apiKey.Trim());
+        if (ImGui.Checkbox("Enable Live Upload", ref enableUpload))
+            UpdateConfig(() => plugin.Configuration.EnableUpload = enableUpload);
 
-        if (ImGui.Button("Save"))
+        if (ImGui.BeginTabBar("SimpleGambaTabs"))
         {
-            plugin.Configuration.ApiKey = apiKey.Trim();
-            plugin.Configuration.EnableUpload = enableUpload;
-            plugin.Configuration.Save();
-        }
-        
-        ImGui.Spacing();
-        ImGui.Spacing();
-        ImGui.TextWrapped("If you have existing stats that you want to upload, you can do so by clicking the button below. This will upload all stats that have been recorded so far while avoiding duplicates that are already uploaded.");
+            if (ImGui.BeginTabItem("SimpleBlackjack"))
+            {
+                ImGui.TextWrapped("If you have existing stats that you want to upload, you can do so by clicking the button below. This will upload all stats that have been recorded so far while avoiding duplicates that are already uploaded.");
+                if (ImGui.Button("Upload existing stats"))
+                {
+                    if (String.IsNullOrEmpty(plugin.Configuration.ApiKey))
+                    {
+                        plugin.ShowToast("Please enter a valid API key.", NotificationType.Error);
+                        return;
+                    }
+                    plugin.UploadExistingStatsSbjAsync();
+                }
+            }
 
-        if (ImGui.Button("Upload existing stats"))
-        {
-            if (String.IsNullOrEmpty(plugin.Configuration.ApiKey))
+            if (ImGui.BeginTabItem("SimpleScratch"))
             {
                 
-                plugin.ShowToast("Please enter a valid API key.", NotificationType.Error);
-                return;
             }
-            plugin.UploadExistingStatsAsync();
         }
+        
+
+    }
+    
+    private void UpdateConfig(Action applyChanges)
+    {
+        applyChanges();
+        plugin.Configuration.Save();
     }
 }

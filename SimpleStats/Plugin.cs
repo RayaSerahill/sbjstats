@@ -29,6 +29,7 @@ public sealed class Plugin : IDalamudPlugin
     public WindowSystem WindowSystem { get; } = new("sbjStats");
     private ConfigWindow ConfigWindow { get; }
     private SimpleBlackjackIpc SimpleBlackjackIpc { get; set; }
+    private SimpleScratchIpc SimpleScratchIpc { get; set; }
     private bool ipcInitialized = false;
     
     const string Endpoint = "https://stats.serahill.net/api/admin/games/import";
@@ -62,18 +63,37 @@ public sealed class Plugin : IDalamudPlugin
             SimpleBlackjackIpc = new SimpleBlackjackIpc(
                 getStats: HandleGetStats,
                 getArchives: HandleGetArchives,
-                processRound: processRound
+                processRound: processRoundSbj
             );
             ipcInitialized = true;
             Log.Information("IPC initialized.");
         } catch (Exception ex)
         {
-            Log.Information($"Failed to initialize IPC: {ex.Message}");
+            Log.Information($"Failed to initialize SimpleBlackjack IPC: {ex.Message}");
+            ipcInitialized = false;
+        }
+        try
+        {
+            Log.Information("Initializing IPC for SimpleScratch...");
+            SimpleScratchIpc = new SimpleScratchIpc(
+                processRound: processRoundScratch
+            );
+            ipcInitialized = true;
+            Log.Information("IPC initialized.");
+        } catch (Exception ex)
+        {
+            Log.Information($"Failed to initialize SimpleScratch IPC: {ex.Message}");
             ipcInitialized = false;
         }
     }
 
-    private void processRound(StatsRecording obj)
+    private void processRoundSbj(StatsRecording obj)
+    {
+        Log.Information("Processing completed SBJ round, uploading stats...");
+        CsvUploader.SendStatAsCsv(obj, Endpoint, Configuration.ApiKey);
+    }
+
+    private void processRoundScratch(StatsRecording obj)
     {
         Log.Information("Processing completed SBJ round, uploading stats...");
         CsvUploader.SendStatAsCsv(obj, Endpoint, Configuration.ApiKey);
@@ -97,7 +117,7 @@ public sealed class Plugin : IDalamudPlugin
         OpenConfigUi();
     }
     
-    public async Task UploadExistingStatsAsync()
+    public async Task UploadExistingStatsSbjAsync()
     {
         var archives = SimpleBlackjackIpc.GetArchives();
         var allStats = new List<StatsRecording>();

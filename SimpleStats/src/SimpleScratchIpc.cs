@@ -8,9 +8,13 @@ namespace sbjStats;
 
 public class SimpleScratchIpc
 {
-    public SimpleScratchIpc()
+    private readonly Action<StatsRecording> _processRound;
+    public SimpleScratchIpc(
+        Action<StatsRecording> processRound
+        )
     {
         PluginLog.Information("SimpleScratchIpc constructor called.");
+        _processRound = processRound;
         EzIPC.Init(this, "SimpleScratch");
         PluginLog.Information("EzIPC.Init called for SimpleScratchIpc.");
     }
