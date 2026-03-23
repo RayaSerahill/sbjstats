@@ -61,7 +61,7 @@ public sealed class ConfigWindow : Window, IDisposable
 
         if (ImGui.BeginTabItem("SimpleScratch"))
         {
-            ImGui.TextWrapped("Upload the current SimpleScratch archive snapshot, or rely on live upload for GameEnded events. The plugin preserves the payload shape and normalizes archived_at to Unix seconds.");
+            ImGui.TextWrapped("Upload all existing SimpleScratch Archives.");
             if (ImGui.Button("Upload current archive snapshot###UploadExistingScratch"))
             {
                 if (string.IsNullOrEmpty(plugin.Configuration.ApiKey))
