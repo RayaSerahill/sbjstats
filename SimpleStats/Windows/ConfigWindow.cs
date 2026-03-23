@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.ImGuiNotification;
@@ -33,29 +33,56 @@ public sealed class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.InputText("API Key", ref apiKey, 512);
-        ImGui.Checkbox("Enable Upload", ref enableUpload);
+        if (ImGui.InputText("API Key", ref apiKey, 512))
+            UpdateConfig(() => plugin.Configuration.ApiKey = apiKey.Trim());
+        if (ImGui.Checkbox("Enable Live Upload", ref enableUpload))
+            UpdateConfig(() => plugin.Configuration.EnableUpload = enableUpload);
 
-        if (ImGui.Button("Save"))
-        {
-            plugin.Configuration.ApiKey = apiKey.Trim();
-            plugin.Configuration.EnableUpload = enableUpload;
-            plugin.Configuration.Save();
-        }
-        
-        ImGui.Spacing();
-        ImGui.Spacing();
-        ImGui.TextWrapped("If you have existing stats that you want to upload, you can do so by clicking the button below. This will upload all stats that have been recorded so far while avoiding duplicates that are already uploaded.");
+        if (!ImGui.BeginTabBar("SimpleGambaTabs"))
+            return;
 
-        if (ImGui.Button("Upload existing stats"))
+        if (ImGui.BeginTabItem("SimpleBlackjack"))
         {
-            if (String.IsNullOrEmpty(plugin.Configuration.ApiKey))
+            ImGui.TextWrapped("If you have existing stats that you want to upload, you can do so by clicking the button below. This will upload all stats that have been recorded so far while avoiding duplicates that are already uploaded.");
+            if (ImGui.Button("Upload existing stats###UploadExistingSbj"))
             {
-                
-                plugin.ShowToast("Please enter a valid API key.", NotificationType.Error);
-                return;
+                if (string.IsNullOrEmpty(plugin.Configuration.ApiKey))
+                {
+                    plugin.ShowToast("Please enter a valid API key.", NotificationType.Error);
+                }
+                else
+                {
+                    _ = plugin.UploadExistingStatsSbjAsync();
+                }
             }
-            plugin.UploadExistingStatsAsync();
+
+            ImGui.EndTabItem();
         }
+
+        if (ImGui.BeginTabItem("SimpleScratch"))
+        {
+            ImGui.TextWrapped("Upload the current SimpleScratch archive snapshot, or rely on live upload for GameEnded events. The plugin preserves the payload shape and normalizes archived_at to Unix seconds.");
+            if (ImGui.Button("Upload current archive snapshot###UploadExistingScratch"))
+            {
+                if (string.IsNullOrEmpty(plugin.Configuration.ApiKey))
+                {
+                    plugin.ShowToast("Please enter a valid API key.", NotificationType.Error);
+                }
+                else
+                {
+                    _ = plugin.UploadExistingStatsScratchAsync();
+                }
+            }
+
+            ImGui.EndTabItem();
+        }
+
+        ImGui.EndTabBar();
+    }
+
+    private void UpdateConfig(Action applyChanges)
+    {
+        applyChanges();
+        plugin.Configuration.Save();
     }
 }
