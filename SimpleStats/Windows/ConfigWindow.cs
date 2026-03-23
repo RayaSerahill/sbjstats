@@ -61,7 +61,7 @@ public sealed class ConfigWindow : Window, IDisposable
 
         if (ImGui.BeginTabItem("SimpleScratch"))
         {
-            ImGui.TextWrapped("SimpleScratch now has its own upload pipeline shell. Live events and archive retrieval are wired up, but the actual transport format still needs to be written in ScratchUploadHandler.");
+            ImGui.TextWrapped("Upload the current SimpleScratch archive snapshot, or rely on live upload for GameEnded events. The plugin preserves the payload shape and normalizes archived_at to Unix seconds.");
             if (ImGui.Button("Upload current archive snapshot###UploadExistingScratch"))
             {
                 if (string.IsNullOrEmpty(plugin.Configuration.ApiKey))

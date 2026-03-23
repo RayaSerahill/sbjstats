@@ -22,7 +22,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private const string CommandName = "/simplestats";
     private const string Endpoint = "https://stats.serahill.net/api/admin/games/import";
-    public const string EndpointScratch = "https://stats.serahill.net/api/admin/scratch/import";
+    public const string EndpointScratch = "http://localhost:3000/api/admin/scratch/import";
 
     public Configuration Configuration { get; }
     public WindowSystem WindowSystem { get; } = new("sbjStats");

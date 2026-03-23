@@ -8,9 +8,9 @@ namespace sbjStats;
 
 public sealed class SimpleScratchIpc
 {
-    private readonly Action<string> onGameEnded;
+    private readonly Action<string, long> onGameEnded;
 
-    public SimpleScratchIpc(Action<string> onGameEnded)
+    public SimpleScratchIpc(Action<string, long> onGameEnded)
     {
         PluginLog.Information("SimpleScratchIpc constructor called.");
         this.onGameEnded = onGameEnded;
@@ -41,7 +41,9 @@ public sealed class SimpleScratchIpc
     private void OnGameEnded(string json)
     {
         DuoLog.Information($"[GameEnded] {json}");
-        onGameEnded(json);
+
+        var archivedAtUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        onGameEnded(json, archivedAtUnixSeconds);
     }
 
     public class CreatePlayerMessage
