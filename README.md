@@ -1,6 +1,6 @@
 # SimpleStats 🐱‍👩‍💻🏳️‍🌈
 
-*Automatically upload Stats from SimpleGamba plugins to serahill.net*
+*Automatically upload Stats from SimpleGamba plugins to stats.serahill.net*
 
 ---
 
@@ -12,7 +12,6 @@
 - Configurable **API key** for secure uploads.
 - Option to enable or disable **live uploading** via the config window.
 - Manual upload button for unarchived stats.
-- Easy-to-use configuration and main windows.
 
 ---
 
@@ -24,4 +23,4 @@
 ## Optionals
 - **SBJ** plugin for Blackjack stats (not included)
 - SimpleScratch plugin for Scratch stats (not included)
-- **Serahill.net** account for uploading stats
+- **stats.serahill.net** account for uploading stats
