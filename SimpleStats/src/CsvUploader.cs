@@ -18,13 +18,30 @@ public static class CsvUploader
         string endpoint,
         string apiKey)
     {
-        var csv = BuildCsv(stat);
-        // Print csv to console for debugging
-        Log.Information("Generated CSV:\n{Csv}", csv);
-        
-        UploadCsvAsync(csv, endpoint, apiKey);
+        _ = SendStatAsCsvAsync(stat, endpoint, apiKey);
     }
-    
+
+    private static async Task SendStatAsCsvAsync(
+        StatsRecording stat,
+        string endpoint,
+        string apiKey)
+    {
+        try
+        {
+            var csv = BuildCsv(stat);
+            // Print csv to console for debugging
+            Log.Information("Generated CSV:\n{Csv}", csv);
+
+            await UploadCsvAsync(csv, endpoint, apiKey);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Live SimpleBlackjack upload failed: {Exception}", ex);
+            Plugin.Instance?.ShowToast("SimpleBlackjack live upload failed. Check /xllog for details.",
+                Dalamud.Interface.ImGuiNotification.NotificationType.Error);
+        }
+    }
+
     public static async Task SendMassStatsAsCsvAsync(
         IEnumerable<StatsRecording> stats,
         string endpoint,

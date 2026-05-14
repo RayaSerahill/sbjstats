@@ -4,6 +4,7 @@ using Dalamud.Game.Command;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Ipc.Exceptions;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ECommons;
@@ -85,24 +86,50 @@ public sealed class Plugin : IDalamudPlugin
 
     public async Task UploadExistingStatsSbjAsync()
     {
-        if (simpleBlackjackIpc is null)
+        try
         {
-            ShowToast("SimpleBlackjack IPC is not available.", NotificationType.Error);
-            return;
-        }
+            if (simpleBlackjackIpc is null)
+            {
+                ShowToast("SimpleBlackjack IPC is not available.", NotificationType.Error);
+                return;
+            }
 
-        await blackjackUploadHandler.UploadExistingAsync(simpleBlackjackIpc);
+            await blackjackUploadHandler.UploadExistingAsync(simpleBlackjackIpc);
+        }
+        catch (IpcNotReadyError ex)
+        {
+            Log.Warning($"SimpleBlackjack IPC is not ready: {ex.Message}");
+            ShowToast("SimpleBlackjack IPC is not available. Make sure SimpleBlackjack is loaded, then try again.", NotificationType.Error);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"SimpleBlackjack existing upload failed: {ex}");
+            ShowToast("SimpleBlackjack upload failed. Check /xllog for details.", NotificationType.Error);
+        }
     }
 
     public async Task UploadExistingStatsScratchAsync()
     {
-        if (simpleScratchIpc is null)
+        try
         {
-            ShowToast("SimpleScratch IPC is not available.", NotificationType.Error);
-            return;
-        }
+            if (simpleScratchIpc is null)
+            {
+                ShowToast("SimpleScratch IPC is not available.", NotificationType.Error);
+                return;
+            }
 
-        await scratchUploadHandler.UploadExistingAsync(simpleScratchIpc);
+            await scratchUploadHandler.UploadExistingAsync(simpleScratchIpc);
+        }
+        catch (IpcNotReadyError ex)
+        {
+            Log.Warning($"SimpleScratch IPC is not ready: {ex.Message}");
+            ShowToast("SimpleScratch IPC is not ready yet. Try again after SimpleScratch finishes loading.", NotificationType.Error);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"SimpleScratch existing upload failed: {ex}");
+            ShowToast("SimpleScratch upload failed. Check /xllog for details.", NotificationType.Error);
+        }
     }
 
     public void ShowToast(string message, NotificationType type = NotificationType.Info)
