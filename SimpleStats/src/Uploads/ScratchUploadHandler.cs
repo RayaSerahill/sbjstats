@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using ECommons.DalamudServices.Legacy;
 using ECommons.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -73,6 +74,7 @@ public sealed class ScratchUploadHandler : GameUploadHandlerBase
             PlayerName = payload?["player_name"]?.ToString(),
             GameId = payload?["player_id"]?.ToString(),
             OccurredAtUnixSeconds = payload?["archived_at"]?.Value<long?>(),
+            Dealer = Plugin.ClientState.LocalPlayer?.Name.TextValue
         };
     }
 
