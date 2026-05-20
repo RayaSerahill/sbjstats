@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using ECommons.DalamudServices.Legacy;
 using ECommons.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -53,7 +54,8 @@ public sealed class ScratchUploadHandler : GameUploadHandlerBase
                 return;
             }
 
-            var request = BuildLiveUploadRequest(transformedJson);
+            var dealer = await GetCurrentCharacterNameAsync();
+            var request = BuildLiveUploadRequest(transformedJson, dealer);
             await SendScratchUploadAsync(request);
         }
         catch (Exception ex)
@@ -64,7 +66,17 @@ public sealed class ScratchUploadHandler : GameUploadHandlerBase
 
     public ScratchUploadRequest BuildLiveUploadRequest(string transformedJson)
     {
+        return BuildLiveUploadRequest(transformedJson, dealer: null);
+    }
+
+    public ScratchUploadRequest BuildLiveUploadRequest(string transformedJson, string? dealer)
+    {
         var payload = TryParseObject(transformedJson);
+        if (payload is not null && !string.IsNullOrWhiteSpace(dealer))
+        {
+            payload["dealer"] = dealer;
+            transformedJson = payload.ToString(Formatting.None);
+        }
 
         return new ScratchUploadRequest
         {
@@ -73,7 +85,13 @@ public sealed class ScratchUploadHandler : GameUploadHandlerBase
             PlayerName = payload?["player_name"]?.ToString(),
             GameId = payload?["player_id"]?.ToString(),
             OccurredAtUnixSeconds = payload?["archived_at"]?.Value<long?>(),
+            Dealer = dealer
         };
+    }
+
+    private static Task<string?> GetCurrentCharacterNameAsync()
+    {
+        return Plugin.Framework.RunOnFrameworkThread(() => Plugin.ClientState.LocalPlayer?.Name.TextValue);
     }
 
     public ScratchUploadRequest BuildArchiveUploadRequest(string transformedJson)

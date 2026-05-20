@@ -18,6 +18,8 @@ public sealed class Plugin : IDalamudPlugin
 
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; set; } = null!;
+    [PluginService] internal static IClientState ClientState { get; set; } = null!;
+    [PluginService] internal static IFramework Framework { get; set; } = null!;
     [PluginService] internal static IPluginLog Log { get; set; } = null!;
     [PluginService] internal static INotificationManager NotificationManager { get; set; } = null!;
 

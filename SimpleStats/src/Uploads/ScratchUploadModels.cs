@@ -7,4 +7,5 @@ public sealed class ScratchUploadRequest
     public string? GameId { get; set; }
     public string? PlayerName { get; set; }
     public long? OccurredAtUnixSeconds { get; set; }
+    public string? Dealer { get; set; }
 }
